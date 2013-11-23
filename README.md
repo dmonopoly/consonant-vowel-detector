@@ -1,2 +1,0 @@
-consonant-vowel-detector
-========================
