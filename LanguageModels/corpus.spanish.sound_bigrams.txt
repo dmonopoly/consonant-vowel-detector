@@ -1,0 +1,474 @@
+47344 a _
+39946 s _
+39429 e _
+36767 o _
+27626 _ e
+26803 _ d
+25542 _ k
+25403 e n
+25245 n _
+22173 _ a
+22122 e s
+22037 d e
+21583 _ l
+21123 o n
+19555 _ p
+17601 l a
+17516 o s
+17515 e r
+16855 r a
+16585 a s
+16577 T i
+16512 _ s
+15888 l _
+15866 a r
+15693 t a
+14687 k o
+14565 i o
+14243 n t
+13043 _ i
+13004 t e
+12597 e l
+12321 a l
+12139 a n
+11418 a D
+11400 s t
+11381 r e
+11164 i a
+11122 _ m
+11038 o r
+10508 r _
+10303 k a
+10274 i _
+9902 t o
+9866 i n
+9597 r i
+9590 D o
+9515 s e
+8977 m a
+8876 D a
+8598 r o
+8439 t i
+8357 l o
+8288 n a
+7996 s i
+7925 n o
+7545 a T
+7289 k e
+7267 _ n
+7209 p a
+7137 u n
+7040 p o
+6876 i e
+6804 m e
+6689 _ t
+6676 t r
+6557 i k
+6536 p r
+6481 l e
+6204 i D
+6196 l i
+6047 _ rr
+6035 _ f
+5896 u e
+5663 e k
+5587 m i
+5546 n D
+5542 D e
+5491 n e
+5412 m o
+5401 o m
+5304 s o
+5278 i s
+5070 rr e
+5056 _ u
+5010 a B
+4896 i t
+4833 B r
+4793 _ o
+4618 a t
+4532 n i
+4504 p e
+4487 a m
+4456 k u
+4421 T e
+4332 s a
+4212 r t
+4079 e t
+3977 e D
+3952 b i
+3950 _ B
+3907 D i
+3864 i T
+3748 s u
+3698 n T
+3676 i m
+3541 _ b
+3533 e m
+3439 i r
+3263 o l
+3129 a k
+3029 B a
+2937 x e
+2899 b e
+2895 t u
+2869 k s
+2861 B i
+2835 e T
+2808 d i
+2768 s p
+2766 n s
+2759 G r
+2755 u r
+2748 D _
+2655 r m
+2644 u l
+2632 k t
+2561 b a
+2506 m p
+2486 e G
+2484 o t
+2480 u s
+2472 f i
+2437 _ T
+2432 G a
+2387 G u
+2356 o D
+2311 T a
+2286 i B
+2258 u a
+2256 p i
+2191 _ G
+2150 l u
+2147 G o
+2142 f e
+2133 k i
+2129 p u
+2111 i b
+2079 m u
+2056 L a
+2028 m B
+1987 o B
+1974 i l
+1913 B l
+1882 _ x
+1875 e b
+1875 b o
+1873 o k
+1869 a p
+1862 f o
+1806 a G
+1760 o p
+1747 f u
+1689 r D
+1629 u _
+1608 n u
+1575 i G
+1567 s k
+1564 r s
+1558 k r
+1539 B e
+1517 e x
+1510 L o
+1509 e a
+1474 a i
+1472 p l
+1440 o T
+1426 r k
+1425 n k
+1420 x o
+1402 u D
+1361 rr a
+1350 x i
+1274 u i
+1245 l t
+1233 e p
+1213 t _
+1204 n f
+1204 B u
+1197 D u
+1188 i L
+1141 J o
+1128 a L
+1101 a x
+1093 u m
+1090 e i
+1089 _ L
+1063 a u
+1045 e tS
+1041 T _
+1023 e f
+1006 tS a
+1002 rr o
+1001 L e
+ 987 e B
+ 978 u t
+ 976 r T
+ 971 u T
+ 958 d o
+ 956 f a
+ 952 i p
+ 947 o b
+ 912 r n
+ 911 k T
+ 907 B o
+ 906 a b
+ 897 r u
+ 894 a f
+ 890 i f
+ 889 u k
+ 879 n G
+ 863 f r
+ 850 u B
+ 849 x a
+ 846 x u
+ 834 tS o
+ 812 n b
+ 812 k _
+ 812 i x
+ 806 s m
+ 804 k l
+ 761 a rr
+ 748 l m
+ 747 o G
+ 729 r p
+ 727 T o
+ 721 e L
+ 719 r l
+ 714 f l
+ 713 a J
+ 709 u p
+ 708 e rr
+ 689 D r
+ 684 e o
+ 671 r G
+ 654 o rr
+ 626 B s
+ 607 u G
+ 604 e J
+ 603 G _
+ 595 r b
+ 591 rr i
+ 582 e u
+ 566 r x
+ 548 n x
+ 531 o x
+ 489 l G
+ 457 m _
+ 430 J a
+ 421 G l
+ 415 o L
+ 413 l b
+ 398 o f
+ 392 u tS
+ 389 p t
+ 364 d a
+ 351 u x
+ 348 s T
+ 342 d u
+ 335 o i
+ 323 l k
+ 322 u L
+ 318 p _
+ 312 _ tS
+ 284 B _
+ 283 rr u
+ 280 i i
+ 274 G n
+ 265 i J
+ 263 tS e
+ 251 G i
+ 222 tS i
+ 216 D n
+ 213 s D
+ 213 r B
+ 209 a o
+ 203 s r
+ 196 a e
+ 192 d _
+ 191 u b
+ 189 e e
+ 187 l D
+ 184 s f
+ 177 o o
+ 175 p T
+ 172 l B
+ 170 s l
+ 164 i u
+ 162 n m
+ 160 f _
+ 157 o tS
+ 157 o e
+ 147 r tS
+ 145 n r
+ 145 i tS
+ 141 p s
+ 138 l s
+ 134 u o
+ 134 B x
+ 133 b _
+ 126 t t
+ 126 L i
+ 124 s s
+ 122 k n
+ 122 B t
+ 119 u f
+ 119 b u
+ 119 a tS
+ 116 D m
+ 115 u rr
+ 113 T k
+ 108 o a
+ 108 L u
+ 106 o u
+ 103 r f
+  93 G s
+  93 G e
+  90 d r
+  89 l p
+  89 k k
+  88 x _
+  85 D b
+  83 m n
+  80 n tS
+  78 s b
+  78 G m
+  78 D D
+  71 s G
+  70 _ _
+  69 i rr
+  66 tS _
+  66 l f
+  64 t k
+  62 n n
+  62 l T
+  59 s B
+  57 L _
+  56 f f
+  53 J e
+  52 T u
+  50 B D
+  45 rr _
+  44 u J
+  44 t m
+  42 D s
+  40 t s
+  40 s tS
+  40 D k
+  36 m m
+  34 s n
+  34 l r
+  32 b D
+  29 D x
+  29 B n
+  26 t l
+  25 p p
+  25 a a
+  21 k m
+  21 J i
+  21 G t
+  20 o J
+  20 l x
+  20 T G
+  19 tS u
+  19 n l
+  19 m l
+  19 B b
+  18 t T
+  16 B B
+  14 tS t
+  13 n B
+  13 T T
+  12 p B
+  12 k G
+  11 l n
+  11 T m
+  10 D l
+   9 m G
+   9 B m
+   8 t n
+   8 m s
+   8 k f
+   7 l tS
+   7 f t
+   7 B k
+   6 tS m
+   6 n p
+   6 G D
+   5 u u
+   5 tS D
+   5 k D
+   5 f m
+   5 b r
+   5 D G
+   5 B p
+   4 tS n
+   4 tS l
+   4 m k
+   4 b s
+   4 _ r
+   4 G x
+   3 x m
+   3 tS r
+   3 t tS
+   3 t D
+   3 d p
+   3 d J
+   3 T n
+   3 J u
+   3 J _
+   2 tS k
+   2 t p
+   2 t b
+   2 t B
+   2 s x
+   2 p m
+   2 p k
+   2 p D
+   2 m t
+   2 m T
+   2 k b
+   2 d n
+   2 d G
+   2 b l
+   2 T p
+   2 T B
+   2 L b
+   2 G f
+   2 G G
+   2 G B
+   2 D t
+   2 D f
+   2 B G
+   1 x t
+   1 x r
+   1 x n
+   1 x f
+   1 x b
+   1 t f
+   1 t G
+   1 rr t
+   1 rr T
+   1 rr D
+   1 r rr
+   1 p f
+   1 p J
+   1 m b
+   1 k tS
+   1 k p
+   1 f s
+   1 f T
+   1 f D
+   1 d t
+   1 d l
+   1 _ J
+   1 T x
+   1 T s
+   1 T r
+   1 T l
+   1 T b
+   1 L s
+   1 L r
+   1 L n
+   1 D B
+   1 B T
