@@ -18,13 +18,15 @@
 #include "EMViterbiPackage/TrellisAid.h"
 
 #include "CypherReader.h"
-#include "TagGrammarFinder.h"
 
 using namespace std;
 
 #define NUMBER_ITERATIONS 50
 #define EXTRA_PRINTING false
 #define SHOW_PROBS_BEFORE_EM false
+
+const string C_VAR = "C'";
+const string V_VAR = "V'";
 
 void DisambiguateDuplicates(const set<string> &obs_symbols,
                             vector<string> *tag_list,
@@ -63,6 +65,13 @@ void DisambiguateDuplicates(const set<string> &obs_symbols,
       }
     }
   }
+}
+
+void PrepareStartingCAndVProbs(map<Notation, double> *data) {
+  Notation pC("P", {C_VAR});
+  Notation pV("P", {V_VAR});
+  (*data)[pC] = .5;
+  (*data)[pV] = .5;
 }
 
 void PrepareObsTagProbs(const vector<string> &observed_data,
@@ -104,22 +113,16 @@ void ChangeAbsoluteProbsToLogProbs(map<Notation, double> *data) {
 }
 
 int main(int argc, char *argv[]) {
-  if (argc != 3) {
-    // TODO: allow trigam counts file + probabilities file too.
-    cerr << "Usage: ./<exec> <bigram-counts-file> <cyphertext>" << endl;
+  if (argc != 2) {
+    cerr << "Usage: ./<exec> <cyphertext>" << endl;
     return 0;
   }
-  string filename_for_bigrams = argv[1];
   map<Notation, double> data;  // Storage for log probabilities and counts.
-  vector<string> tag_list;
-  bool found = TagGrammarFinder::GetTagGrammarFromOrganizedRows(
-      filename_for_bigrams, &data, &tag_list);
-  if (!found)
-    return 0;
-  else if (EXTRA_PRINTING)
-    cout << "Found tag grammar.\n";
 
-  string filename_for_cypher = argv[2];
+  // Use tag grammar of only two tags: C and V.
+  vector<string> tag_list{C_VAR, V_VAR};
+
+  string filename_for_cypher = argv[1];
   vector<string> observed_data;
   set<string> obs_symbols;
   vector<Node *> nodes;
@@ -134,10 +137,12 @@ int main(int argc, char *argv[]) {
     cout << "Found cyphertext.\n";
 
   DisambiguateDuplicates(obs_symbols, &tag_list, &data);
+  PrepareStartingCAndVProbs(&data);
   PrepareObsTagProbs(observed_data, tag_list, obs_symbols, &data);
   SeedNotationConstants(&data);
   ChangeAbsoluteProbsToLogProbs(&data);
   clock_t t = clock();
+  // TODO: use edges_to_update = all_edges...
   TrellisAid::BuildTrellis(&nodes, &edges_to_update, &all_edges, observed_data,
                            tag_list);
   if (EXTRA_PRINTING) {
