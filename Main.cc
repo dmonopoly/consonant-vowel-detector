@@ -72,6 +72,15 @@ void PrepareStartingCAndVProbs(map<Notation, double> *data) {
   Notation pV("P", {V_VAR});
   (*data)[pC] = .5;
   (*data)[pV] = .5;
+
+  Notation pCGivenV("P", {C_VAR}, Notation::GIVEN_DELIM, {V_VAR});
+  Notation pVGivenV("P", {V_VAR}, Notation::GIVEN_DELIM, {V_VAR});
+  Notation pCGivenC("P", {C_VAR}, Notation::GIVEN_DELIM, {C_VAR});
+  Notation pVGivenC("P", {V_VAR}, Notation::GIVEN_DELIM, {C_VAR});
+  (*data)[pCGivenV] = .5;
+  (*data)[pVGivenV] = .5;
+  (*data)[pCGivenC] = .5;
+  (*data)[pVGivenC] = .5;
 }
 
 void PrepareObsTagProbs(const vector<string> &observed_data,

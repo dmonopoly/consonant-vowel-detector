@@ -209,8 +209,8 @@ namespace TrellisAid {
         for (int i = 1; i < nodes.size(); ++i) {
           double sum = -DBL_MAX;
           for (Edge *e : nodes[i]->parent_edges) {
-            // TODO: remove
-            cout << "edge rep: " << e->repr() << endl;
+//             // TODO: remove
+//             cout << "edge rep: " << e->repr() << endl;
             sum = Basic::AddLogs(sum,
                 alpha[e->src->repr()] + data->at(e->repr()));
           }
