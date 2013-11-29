@@ -21,12 +21,16 @@
 
 using namespace std;
 
-#define NUMBER_ITERATIONS 50
+#define NUMBER_ITERATIONS 10
 #define EXTRA_PRINTING false
 #define SHOW_PROBS_BEFORE_EM false
 
-const string C_VAR = "C'";
-const string V_VAR = "V'";
+const string C_TAG = "C'";
+const string V_TAG = "V'";
+const string SPACE_TAG = "_'";
+
+// Use tag grammar of only three tags: C, V and space.
+vector<string> full_tag_list{C_TAG, V_TAG, SPACE_TAG};
 
 void DisambiguateDuplicates(const set<string> &obs_symbols,
                             vector<string> *tag_list,
@@ -67,20 +71,47 @@ void DisambiguateDuplicates(const set<string> &obs_symbols,
   }
 }
 
-void PrepareStartingCAndVProbs(map<Notation, double> *data) {
-  Notation pC("P", {C_VAR});
-  Notation pV("P", {V_VAR});
-  (*data)[pC] = .5;
-  (*data)[pV] = .5;
+void PrepareStartingTagProbs(map<Notation, double> *data) {
+  // TODO: why END_NODE not in range with this here? does same as below...
+//   for (int i = 0; i < full_tag_list.size(); ++i) {
+//     Notation pOne("P", {full_tag_list[i]});
+//     (*data)[pOne] = 1/3;
+//     for (int j = 0; j < full_tag_list.size(); ++j) {
+//       Notation pOneGivenOther("P", {full_tag_list[i]}, Notation::GIVEN_DELIM, 
+//                               {full_tag_list[j]});
+//       (*data)[pOneGivenOther] = 1/3;
+//     }
+//   }
+  Notation pC("P", {C_TAG});
+  Notation pV("P", {V_TAG});
+  Notation pSpace("P", {SPACE_TAG});
+  (*data)[pC] = 1/3;
+  (*data)[pV] = 1/3;
+  (*data)[pSpace] = 1/3;
 
-  Notation pCGivenV("P", {C_VAR}, Notation::GIVEN_DELIM, {V_VAR});
-  Notation pVGivenV("P", {V_VAR}, Notation::GIVEN_DELIM, {V_VAR});
-  Notation pCGivenC("P", {C_VAR}, Notation::GIVEN_DELIM, {C_VAR});
-  Notation pVGivenC("P", {V_VAR}, Notation::GIVEN_DELIM, {C_VAR});
-  (*data)[pCGivenV] = .5;
-  (*data)[pVGivenV] = .5;
-  (*data)[pCGivenC] = .5;
-  (*data)[pVGivenC] = .5;
+  Notation pCGivenV("P", {C_TAG}, Notation::GIVEN_DELIM, {V_TAG});
+  Notation pVGivenV("P", {V_TAG}, Notation::GIVEN_DELIM, {V_TAG});
+  Notation pSpaceGivenV("P", {SPACE_TAG}, Notation::GIVEN_DELIM, {V_TAG});
+
+  Notation pCGivenC("P", {C_TAG}, Notation::GIVEN_DELIM, {C_TAG});
+  Notation pVGivenC("P", {V_TAG}, Notation::GIVEN_DELIM, {C_TAG});
+  Notation pSpaceGivenC("P", {SPACE_TAG}, Notation::GIVEN_DELIM, {C_TAG});
+
+  Notation pCGivenSpace("P", {C_TAG}, Notation::GIVEN_DELIM, {SPACE_TAG});
+  Notation pVGivenSpace("P", {V_TAG}, Notation::GIVEN_DELIM, {SPACE_TAG});
+  Notation pSpaceGivenSpace("P", {SPACE_TAG}, Notation::GIVEN_DELIM, {SPACE_TAG});
+
+  (*data)[pCGivenV] = 1/3;
+  (*data)[pVGivenV] = 1/3;
+  (*data)[pSpaceGivenV] = 1/3;
+
+  (*data)[pCGivenC] = 1/3;
+  (*data)[pVGivenC] = 1/3;
+  (*data)[pSpaceGivenC] = 1/3;
+
+  (*data)[pCGivenSpace] = 1/3;
+  (*data)[pVGivenSpace] = 1/3;
+  (*data)[pSpaceGivenSpace] = 1/3;
 }
 
 void PrepareObsTagProbs(const vector<string> &observed_data,
@@ -128,9 +159,6 @@ int main(int argc, char *argv[]) {
   }
   map<Notation, double> data;  // Storage for log probabilities and counts.
 
-  // Use tag grammar of only two tags: C and V.
-  vector<string> tag_list{C_VAR, V_VAR};
-
   string filename_for_cypher = argv[1];
   vector<string> observed_data;
   set<string> obs_symbols;
@@ -145,8 +173,10 @@ int main(int argc, char *argv[]) {
   else if (EXTRA_PRINTING)
     cout << "Found cyphertext.\n";
 
+  vector<string> tag_list = full_tag_list;
+
   DisambiguateDuplicates(obs_symbols, &tag_list, &data);
-  PrepareStartingCAndVProbs(&data);
+  PrepareStartingTagProbs(&data);
   PrepareObsTagProbs(observed_data, tag_list, obs_symbols, &data);
   SeedNotationConstants(&data);
   ChangeAbsoluteProbsToLogProbs(&data);
