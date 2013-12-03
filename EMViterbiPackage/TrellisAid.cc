@@ -59,7 +59,7 @@ namespace TrellisAid {
         }
         future_prev_nodes.push_back(n2);
         Notation notation_obj("P", {the_word}, Notation::GIVEN_DELIM,
-            {the_tag});
+                              {the_tag});
         Edge *e = new Edge(notation_obj, n1, n2);
         select_edges->push_back(e);
         all_edges->push_back(e);
@@ -248,28 +248,29 @@ namespace TrellisAid {
         cout << "Counting pass... " << endl;
       }
 
-      // Counting pass.  The count key can be determined by looking at any node
-      // this select edge is incident on. We take that node's 'tag' and 'word'
-      // fields. For count_keys, we follow the convention of C(tag, word) (e.g.,
-      // C(X,A)).
+      // Counting pass. e->notation.first[0] gets the word if select edge
+      // represents a channel probability; if LM probability, then tag. This is
+      // because in BuildTrellis edges are constructed with a Notation object
+      // with this form: P(w|t) or P(t|t).
 
       // First reset the counts.
       for (int i = 0; i < select_edges.size(); ++i) {
         Edge *e = select_edges[i];
-        Notation n_count_key("C", {e->dest->tag, e->dest->word},
-                             Notation::AND_DELIM);
+        Notation n_count_key("C", {e->notation.second[0]}, Notation::AND_DELIM,
+                             {e->notation.first[0]});
         (*data)[n_count_key] = -DBL_MAX; // log(0)
       }
 
       // Key: tag. Value: total fractional count associated with that tag.
+      // Tag is accessed via e->notation.second[0].
       unordered_map<string, double> total_fract_counts;
 
       // Iterate over select edges to update count_keys, used for updating
       // probabilities later.
       for (int i = 0; i < select_edges.size(); ++i) {
         Edge *e = select_edges[i];
-        Notation count_key("C", {e->dest->tag, e->dest->word},
-                             Notation::AND_DELIM);
+        Notation count_key("C", {e->notation.second[0]}, Notation::AND_DELIM,
+                           {e->notation.first[0]});
         if (EXTRA_PRINTING) {
           cout << Basic::Tab(1) << "Getting count key from edge " << e->repr()
               << ": " << count_key << endl;
@@ -283,8 +284,8 @@ namespace TrellisAid {
         // (*data)[count_key]. This compensates for adding too-early cXA's when
         // computing the total fractional counts for C(X,w_i).
         if (already_used[count_key]) {
-          total_fract_counts[e->dest->tag] =
-            Basic::SubtractLogs(total_fract_counts[e->dest->tag],
+          total_fract_counts[e->notation.second[0]] =
+            Basic::SubtractLogs(total_fract_counts[e->notation.second[0]],
                                 (*data)[count_key]);
         }
         (*data)[count_key] = Basic::AddLogs((*data)[count_key],
@@ -294,14 +295,14 @@ namespace TrellisAid {
                                             alpha[nodes.back()->repr()]);
         already_used[count_key] = true;
 
-        if (total_fract_counts[e->dest->tag] == 0) {
+        if (total_fract_counts[e->notation.second[0]] == 0) {
           // If this is the first time we encounter this key, the default is 0,
           // which we actually want to be negative infinity. The sum is just the
           // count_key log value itself.
-          total_fract_counts[e->dest->tag] = (*data)[count_key];
+          total_fract_counts[e->notation.second[0]] = (*data)[count_key];
         } else {
-          total_fract_counts[e->dest->tag] =
-            Basic::AddLogs(total_fract_counts[e->dest->tag],
+          total_fract_counts[e->notation.second[0]] =
+            Basic::AddLogs(total_fract_counts[e->notation.second[0]],
                            (*data)[count_key]);
         }
       }
@@ -310,11 +311,11 @@ namespace TrellisAid {
       // next iteration.
       for (int i = 0; i < select_edges.size(); ++i) {
         Edge *e = select_edges[i];
-        Notation n_count_key("C", {e->dest->tag, e->dest->word},
-                             Notation::AND_DELIM);
+        Notation n_count_key("C", {e->notation.second[0]}, Notation::AND_DELIM,
+                             {e->notation.first[0]});
 
         (*data)[e->repr()] = (*data)[n_count_key] -
-          total_fract_counts.at(e->dest->tag);
+          total_fract_counts.at(e->notation.second[0]);
       }
 
       // Update probability of observed data sequence. This should increase
