@@ -54,6 +54,7 @@ namespace TrellisAid {
             if (EXTRA_PRINTING)
               cout << Basic::Tab(2) << "new edge: " << notation_obj << endl;
             Edge *e = new Edge(notation_obj, p, n1);
+            // TODO: HEREEE
             all_edges->push_back(e);
           }
         }
@@ -146,6 +147,11 @@ namespace TrellisAid {
       try {
         name = best_path.at(next_node_repr);
       } catch (out_of_range &e) {
+        // This can happen when best_path doesn't set the node, which can happen
+        // when, in the main Viterbi loop above, new_val > opt.at(next.repr())
+        // isn't satisfied when it should be. In particular, if new_val isn't
+        // actually improved upon - the + data.at(e->repr()) doesn't add
+        // anything - then you have this issue!
         cerr << "Out of range error in Viterbi while getting name: " <<
           next_node_repr << " | " << e.what() << endl;
       }
