@@ -21,9 +21,11 @@
 
 using namespace std;
 
-#define NUMBER_ITERATIONS 30
 #define EXTRA_PRINTING false
+
+#define NUMBER_ITERATIONS 30
 #define SHOW_PROBS_BEFORE_EM false
+#define RANDOM_INITIAL_START false
 
 // Assumes _ is a space in the cypher.
 const string C_TAG = "C'";
@@ -95,7 +97,12 @@ void PrepareObsTagProbs(const vector<string> &observed_data,
   for (auto obs = observed_data.begin(); obs != observed_data.end(); ++obs) {
     for (auto tag = tag_list.begin(); tag != tag_list.end(); ++tag) {
       Notation nObsTagProb("P", {*obs}, Notation::GIVEN_DELIM, {*tag});
-      (*data)[nObsTagProb] = (double) 1/(obs_symbols.size() - 1); // -1 to ignore space
+      // Uniform probability: -1 to exclude space.
+      if (RANDOM_INITIAL_START) {
+
+      } else {
+        (*data)[nObsTagProb] = (double) 1/(obs_symbols.size() - 1);
+      }
     }
   }
   // Deal with spaces in the substitute table: set
@@ -167,7 +174,6 @@ int main(int argc, char *argv[]) {
 
   cout << NUMBER_ITERATIONS << " iterations:" << endl;
 
-  Notation nObsSeq("P", observed_data, Notation::SEQ_DELIM);
   TrellisAid::ForwardBackwardAndViterbi(NUMBER_ITERATIONS, nodes,
                                         edges_to_update, all_edges, &data,
                                         observed_data);

@@ -1,7 +1,10 @@
+#include <fstream>
+
 #include "TrellisAid.h"
 
-#define PRINT_VITERBI_RESULTS_OFTEN false
 #define EXTRA_PRINTING false
+
+#define PRINT_VITERBI_RESULTS_OFTEN true
 
 namespace TrellisAid {
   void BuildTrellis(vector<Node *> *nodes, vector<Edge *> *select_edges,
@@ -195,6 +198,10 @@ namespace TrellisAid {
                                  map<Notation, double> *data,
                                  const vector<string> observed_data) {
     Notation nObsSeq("P", observed_data, Notation::SEQ_DELIM);
+    ofstream fout;
+    if (PRINT_VITERBI_RESULTS_OFTEN) {
+      fout.open("observed_data_probabilities.txt");
+    }
     if (EXTRA_PRINTING)
       cout << "Beginning Forward-Backward." << endl;
     // Value: true if already used. Main purpose is for checking while
@@ -333,6 +340,7 @@ namespace TrellisAid {
         // Print P(obs).
         cout << "P(observed sequence): " << alpha[nodes.back()->repr()] <<
                                             endl << endl;
+        fout << alpha[nodes.back()->repr()] << endl;
       }
     }
     if (EXTRA_PRINTING) {
