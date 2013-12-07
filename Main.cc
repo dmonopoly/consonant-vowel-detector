@@ -21,7 +21,7 @@
 
 using namespace std;
 
-#define NUMBER_ITERATIONS 10
+#define NUMBER_ITERATIONS 30
 #define EXTRA_PRINTING false
 #define SHOW_PROBS_BEFORE_EM false
 
@@ -91,6 +91,7 @@ void PrepareObsTagProbs(const vector<string> &observed_data,
                         map<Notation, double> *data) {
   // Sets initial observed char / tag probabilities. Can seed to uniform
   // probability (1/# of unique observed symbols) or randomize.
+  // TODO: randomized restarts.
   for (auto obs = observed_data.begin(); obs != observed_data.end(); ++obs) {
     for (auto tag = tag_list.begin(); tag != tag_list.end(); ++tag) {
       Notation nObsTagProb("P", {*obs}, Notation::GIVEN_DELIM, {*tag});
@@ -151,7 +152,6 @@ int main(int argc, char *argv[]) {
   SeedNotationConstants(&data);
   ChangeAbsoluteProbsToLogProbs(&data);
   clock_t t = clock();
-  // TODO: use edges_to_update = all_edges...
   TrellisAid::BuildTrellis(&nodes, &edges_to_update, &all_edges, observed_data,
                            tag_list);
   if (EXTRA_PRINTING) {

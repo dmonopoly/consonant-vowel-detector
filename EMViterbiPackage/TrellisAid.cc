@@ -54,7 +54,7 @@ namespace TrellisAid {
             if (EXTRA_PRINTING)
               cout << Basic::Tab(2) << "new edge: " << notation_obj << endl;
             Edge *e = new Edge(notation_obj, p, n1);
-            // TODO: HEREEE
+            select_edges->push_back(e);  // Make LM probs also updatable.
             all_edges->push_back(e);
           }
         }
@@ -215,8 +215,6 @@ namespace TrellisAid {
         for (int i = 1; i < nodes.size(); ++i) {
           double sum = -DBL_MAX;
           for (Edge *e : nodes[i]->parent_edges) {
-//             // TODO: remove
-//             cout << "edge rep: " << e->repr() << endl;
             sum = Basic::AddLogs(sum,
                 alpha[e->src->repr()] + data->at(e->repr()));
           }
