@@ -174,9 +174,8 @@ int main(int argc, char *argv[]) {
 
   cout << NUMBER_ITERATIONS << " iterations:" << endl;
 
-  TrellisAid::ForwardBackwardAndViterbi(NUMBER_ITERATIONS, nodes,
-                                        edges_to_update, all_edges, &data,
-                                        observed_data);
+  TrellisAid::ForwardBackwardAndViterbi(NUMBER_ITERATIONS, obs_symbols,
+      tag_list, nodes, edges_to_update, all_edges, &data, observed_data);
   TrellisAid::DestroyTrellis(&nodes, &all_edges);
   t = clock() - t;
   printf("It took me %lu clicks (%f seconds).\n", t, ((float)t)/CLOCKS_PER_SEC);

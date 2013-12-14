@@ -3,7 +3,6 @@
 #include "TrellisAid.h"
 
 #define EXTRA_PRINTING false
-
 #define PRINT_VITERBI_RESULTS_OFTEN true
 
 namespace TrellisAid {
@@ -48,6 +47,7 @@ namespace TrellisAid {
         if (topol_index == 1) {
           Notation notation_obj("P", {the_tag});
           Edge *e = new Edge(notation_obj, start_node, n1);
+          e->set_type(Edge::EdgeType::SINGLE_TAG);
           all_edges->push_back(e);
         } else {
           for (Node *p : prev_nodes) {
@@ -57,6 +57,7 @@ namespace TrellisAid {
             if (EXTRA_PRINTING)
               cout << Basic::Tab(2) << "new edge: " << notation_obj << endl;
             Edge *e = new Edge(notation_obj, p, n1);
+            e->set_type(Edge::EdgeType::LANGUAGE_MODEL);
             select_edges->push_back(e);  // Make LM probs also updatable.
             all_edges->push_back(e);
           }
@@ -65,6 +66,7 @@ namespace TrellisAid {
         Notation notation_obj("P", {the_word}, Notation::GIVEN_DELIM,
                               {the_tag});
         Edge *e = new Edge(notation_obj, n1, n2);
+        e->set_type(Edge::EdgeType::CHANNEL);
         select_edges->push_back(e);
         all_edges->push_back(e);
       }
@@ -77,6 +79,7 @@ namespace TrellisAid {
     nodes->push_back(end_node);
     for (Node *p : prev_nodes) {
       Edge *e = new Edge(NotationConstants::p1, p, end_node);
+      e->set_type(Edge::EdgeType::CONSTANT);
       all_edges->push_back(e);
     }
 
@@ -121,6 +124,7 @@ namespace TrellisAid {
         Node *next = e->dest;
         try {
           double new_val = opt.at(current_node->repr()) + data.at(e->repr());
+          // Underflow error originally happened here.
           if (new_val > opt.at(next->repr())) {
             opt[next->repr()] = new_val;
             best_path[next->repr()] = current_node->repr();
@@ -192,6 +196,8 @@ namespace TrellisAid {
   } // End Viterbi
 
   void ForwardBackwardAndViterbi(const int num_iterations,
+                                 const set<string> &word_list, 
+                                 const vector<string> &tag_list,
                                  const vector<Node *> &nodes,
                                  const vector<Edge *> &select_edges,
                                  const vector<Edge *> &all_edges,
@@ -204,10 +210,6 @@ namespace TrellisAid {
     }
     if (EXTRA_PRINTING)
       cout << "Beginning Forward-Backward." << endl;
-    // Value: true if already used. Main purpose is for checking while
-    // accumulating fractional counts in counting pass, but also used in output
-    // setup.
-    map<Notation, bool> already_used;
 
     // PRECONDITION: The order of nodes/edges is already in topological order.
     map<string, double> alpha;  // Sum of all paths from start to this node.
@@ -222,11 +224,21 @@ namespace TrellisAid {
         for (int i = 1; i < nodes.size(); ++i) {
           double sum = -DBL_MAX;
           for (Edge *e : nodes[i]->parent_edges) {
+            if (EXTRA_PRINTING) {
+              cout << Basic::Tab(1) << "Accumulating new alpha value by adding " 
+                << sum << " (previous sum) to \n[" << alpha[e->src->repr()] << 
+                " (alpha of src) and " << data->at(e->repr()) << 
+                " (data at edge)]: " << "[" << 
+                  alpha[e->src->repr()] + data->at(e->repr()) << "]" << endl;
+            }
             sum = Basic::AddLogs(sum,
                 alpha[e->src->repr()] + data->at(e->repr()));
+            if (EXTRA_PRINTING) {
+              cout << Basic::Tab(1) << "Sum is now " << sum << endl;
+            }
           }
-          if (EXTRA_PRINTING){
-            cout << Basic::Tab(1) << "Alpha value for " << nodes[i]->repr() <<
+          if (EXTRA_PRINTING) {
+            cout << Basic::Tab(2) << "Resulting alpha value for " << nodes[i]->repr() <<
                 ": " << sum << endl;
           }
           alpha[nodes[i]->repr()] = sum;
@@ -273,8 +285,13 @@ namespace TrellisAid {
       }
 
       // Key: tag. Value: total fractional count associated with that tag.
+      // Example: When normalizing probabilities - i.e., computing P(b|x) from
+      // C(x, b), we do C(x, b)/sum of all C(x, w) over all w. The denominator
+      // is the total fractional count for the tag x. This is for _tw. For _tt,
+      // it is the same idea, except sum C(x, t) over all tags t.
       // Tag is accessed via e->notation.second[0].
-      unordered_map<string, double> total_fract_counts;
+      unordered_map<string, double> total_fract_counts_tw; // Sum C(t, w_i)
+      unordered_map<string, double> total_fract_counts_tt; // Sum C(t, t_i)
 
       // Iterate over select edges to update count_keys, used for updating
       // probabilities later.
@@ -285,48 +302,69 @@ namespace TrellisAid {
         if (EXTRA_PRINTING) {
           cout << Basic::Tab(1) << "Getting count key from edge " << e->repr()
               << ": " << count_key << endl;
-          cout << Basic::Tab(1) << alpha[e->src->repr()] <<
-              "<-alpha edge prob->" << data->at(e->repr()) << endl;
-          cout << Basic::Tab(1) << beta[e->dest->repr()] << "<-beta end->" <<
+          cout << Basic::Tab(2) << alpha[e->src->repr()] <<
+              "<-alpha, edge prob->" << data->at(e->repr()) << endl;
+          cout << Basic::Tab(2) << beta[e->dest->repr()] << "<-beta, end->" <<
               alpha[nodes.back()->repr()] << endl;
         }
-        // If we already saw this count key, subtract all previously accumulated
-        // values for that count_key from total_fract_counts before updating
-        // (*data)[count_key]. This compensates for adding too-early cXA's when
-        // computing the total fractional counts for C(X,w_i).
-        if (already_used[count_key]) {
-          total_fract_counts[e->notation.second[0]] =
-            Basic::SubtractLogs(total_fract_counts[e->notation.second[0]],
-                                (*data)[count_key]);
-        }
-        (*data)[count_key] = Basic::AddLogs((*data)[count_key],
-                                            alpha[e->src->repr()] +
-                                            data->at(e->repr()) +
-                                            beta[e->dest->repr()] -
-                                            alpha[nodes.back()->repr()]);
-        already_used[count_key] = true;
-
-        if (total_fract_counts[e->notation.second[0]] == 0) {
-          // If this is the first time we encounter this key, the default is 0,
-          // which we actually want to be negative infinity. The sum is just the
-          // count_key log value itself.
-          total_fract_counts[e->notation.second[0]] = (*data)[count_key];
+        if (EXTRA_PRINTING) {
+          cout << Basic::Tab(2) << "Data at count key before: " << 
+            (*data)[count_key] << endl;
+          double val = Basic::AddLogs((*data)[count_key],
+                         alpha[e->src->repr()] +
+                         data->at(e->repr()) +
+                         beta[e->dest->repr()] -
+                         alpha[nodes.back()->repr()]);
+          cout << Basic::Tab(2) << "Value about to add -> " << val << endl;
+          cout << Basic::Tab(2) << "Final data at count key: " << 
+            (*data)[count_key] << endl;
+          (*data)[count_key] = val;
         } else {
-          total_fract_counts[e->notation.second[0]] =
-            Basic::AddLogs(total_fract_counts[e->notation.second[0]],
-                           (*data)[count_key]);
+          (*data)[count_key] = Basic::AddLogs((*data)[count_key],
+                                              alpha[e->src->repr()] +
+                                              data->at(e->repr()) +
+                                              beta[e->dest->repr()] -
+                                              alpha[nodes.back()->repr()]);
         }
       }
+      // Compute total_fract_counts by summing C(tag, tag_i).
+      for (string tag : tag_list) {
+        double tag_total_frac_count = 0;
+        for (string tag_i : tag_list) {
+          Notation count_of_tag_and_tag_i("C", {tag}, Notation::AND_DELIM,
+                                          {tag_i});
+          tag_total_frac_count += (*data)[count_of_tag_and_tag_i];
+        }
+        total_fract_counts_tt[tag] = tag_total_frac_count;
+      }
+      // Compute total_fract_counts by summing C(tag, word_i).
+      for (string tag : tag_list) {
+        double tag_total_frac_count = 0;
+        for (string word_i : word_list) {
+          Notation count_of_tag_and_tag_i("C", {tag}, Notation::AND_DELIM,
+                                          {word_i});
+          tag_total_frac_count += (*data)[count_of_tag_and_tag_i];
+        }
+        total_fract_counts_tw[tag] = tag_total_frac_count;
+      }
 
-      // Update the unknown probabilities that we want to find. Use them in the
-      // next iteration.
+      // Normalization step: Update the unknown probabilities that we want to
+      // find. Use them in the next iteration.
       for (int i = 0; i < select_edges.size(); ++i) {
         Edge *e = select_edges[i];
         Notation n_count_key("C", {e->notation.second[0]}, Notation::AND_DELIM,
                              {e->notation.first[0]});
-
-        (*data)[e->repr()] = (*data)[n_count_key] -
-          total_fract_counts.at(e->notation.second[0]);
+        if (e->type == Edge::EdgeType::CHANNEL) {
+          (*data)[e->repr()] = (*data)[n_count_key] -
+            total_fract_counts_tw.at(e->notation.second[0]);
+        } else if (e->type == Edge::EdgeType::LANGUAGE_MODEL) {
+          (*data)[e->repr()] = (*data)[n_count_key] -
+            total_fract_counts_tt.at(e->notation.second[0]);
+        } else {
+          cerr << "Unknown edge type in normalization step of Forward-Backward:"
+            << " " << e->type << endl;
+          exit(0);
+        }
       }
 
       // Update probability of observed data sequence. This should increase

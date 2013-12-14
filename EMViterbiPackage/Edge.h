@@ -13,9 +13,19 @@ using namespace std;
 struct Node;
 
 struct Edge {
+  enum EdgeType {
+    CHANNEL,  // P(w|t)
+    LANGUAGE_MODEL,  // P(t_2|t_1)
+    SINGLE_TAG,  // P(t)
+    CONSTANT,  // P(1)
+  };
+  EdgeType type;
   Notation notation;
   Node *src, *dest;
   Edge(Notation n, Node *src, Node *dest);
+  void set_type(EdgeType type) {
+    this->type = type;
+  }
   Notation repr() {
     return notation;
   }
