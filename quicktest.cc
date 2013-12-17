@@ -19,8 +19,8 @@ int main(int argc, char *argv[]) {
   Notation n1("P", {"A"}, Notation::GIVEN_DELIM, {"B"});
   map<Notation, double> data;
 
-  cout << 1/3 << endl;
-  cout << (double) 1/3 << endl;
+  cout << -DBL_MAX << endl;
+  cout << -DBL_MAX + -DBL_MAX << endl;
 
   return 0;
 }

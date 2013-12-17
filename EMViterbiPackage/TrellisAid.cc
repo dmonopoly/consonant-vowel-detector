@@ -3,7 +3,7 @@
 #include "TrellisAid.h"
 
 #define EXTRA_PRINTING false
-#define PRINT_VITERBI_RESULTS_OFTEN true
+#define PRINT_VITERBI_RESULTS_OFTEN false
 
 namespace TrellisAid {
   void BuildTrellis(vector<Node *> *nodes, vector<Edge *> *select_edges,
@@ -314,8 +314,11 @@ namespace TrellisAid {
                          alpha[e->src->repr()] +
                          data->at(e->repr()) +
                          beta[e->dest->repr()] -
-                         alpha[nodes.back()->repr()]);
+                         alpha[nodes.back()->repr()]); // positive... BAD? or okay? TODO: Issue #1
           cout << Basic::Tab(2) << "Value about to add -> " << val << endl;
+          if (val > 0) {
+            cout << "Bad AddLog: result was positive." << endl;
+          }
           cout << Basic::Tab(2) << "Final data at count key: " << 
             (*data)[count_key] << endl;
           (*data)[count_key] = val;
@@ -329,23 +332,35 @@ namespace TrellisAid {
       }
       // Compute total_fract_counts by summing C(tag, tag_i).
       for (string tag : tag_list) {
-        double tag_total_frac_count = 0;
+        double tag_total_frac_count = -DBL_MAX;
         for (string tag_i : tag_list) {
           Notation count_of_tag_and_tag_i("C", {tag}, Notation::AND_DELIM,
                                           {tag_i});
-          tag_total_frac_count += (*data)[count_of_tag_and_tag_i];
+          tag_total_frac_count = Basic::AddLogs(tag_total_frac_count,
+              (*data)[count_of_tag_and_tag_i]);
+          // TODO: Debugging for Issue #1. Remove.
+//           cout << "  just added " << (*data)[count_of_tag_and_tag_i] << endl;
         }
         total_fract_counts_tt[tag] = tag_total_frac_count;
+        // TODO: Debugging for Issue #1. Remove.
+//         cout << "tt tag_total_frac_count for " << tag << ": " <<
+//           tag_total_frac_count << endl;
       }
       // Compute total_fract_counts by summing C(tag, word_i).
       for (string tag : tag_list) {
-        double tag_total_frac_count = 0;
+        double tag_total_frac_count = -DBL_MAX;
         for (string word_i : word_list) {
-          Notation count_of_tag_and_tag_i("C", {tag}, Notation::AND_DELIM,
+          Notation count_of_tag_and_word_i("C", {tag}, Notation::AND_DELIM,
                                           {word_i});
-          tag_total_frac_count += (*data)[count_of_tag_and_tag_i];
+          tag_total_frac_count = Basic::AddLogs(tag_total_frac_count,
+              (*data)[count_of_tag_and_word_i]);
+          // TODO: Debugging for Issue #1. Remove.
+//           cout << "  just added " << (*data)[count_of_tag_and_word_i] << endl;
         }
         total_fract_counts_tw[tag] = tag_total_frac_count;
+        // TODO: Debugging for Issue #1. Remove.
+//         cout << "tw tag_total_frac_count for " << tag << ": " <<
+//           tag_total_frac_count << endl;
       }
 
       // Normalization step: Update the unknown probabilities that we want to

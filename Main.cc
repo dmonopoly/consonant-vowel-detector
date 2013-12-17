@@ -23,9 +23,9 @@ using namespace std;
 
 #define EXTRA_PRINTING false
 
-#define NUMBER_ITERATIONS 30
+#define NUMBER_ITERATIONS 50
 #define SHOW_PROBS_BEFORE_EM false
-#define RANDOM_INITIAL_START false
+#define RANDOM_INITIAL_START true
 
 // Assumes _ is a space in the cypher.
 const string C_TAG = "C'";
@@ -94,14 +94,33 @@ void PrepareObsTagProbs(const vector<string> &observed_data,
   // Sets initial observed char / tag probabilities. Can seed to uniform
   // probability (1/# of unique observed symbols) or randomize.
   // TODO: randomized restarts.
-  for (auto obs = observed_data.begin(); obs != observed_data.end(); ++obs) {
-    for (auto tag = tag_list.begin(); tag != tag_list.end(); ++tag) {
-      Notation nObsTagProb("P", {*obs}, Notation::GIVEN_DELIM, {*tag});
-      // Uniform probability: -1 to exclude space.
-      if (RANDOM_INITIAL_START) {
-
-      } else {
-        (*data)[nObsTagProb] = (double) 1/(obs_symbols.size() - 1);
+  if (RANDOM_INITIAL_START) {
+    vector<double> random_values;
+    int sum = 0;
+    for (auto obs = observed_data.begin(); obs != observed_data.end(); ++obs) {
+      for (auto tag = tag_list.begin(); tag != tag_list.end(); ++tag) {
+        int tmp = rand() % 1000;
+        sum += tmp;
+        random_values.push_back(tmp);
+      }
+    }
+    for (auto it = random_values.begin(); it != random_values.end(); ++it) {
+      *it = (double) *it / sum;
+    }
+    int rand_index = 0;
+    for (auto obs = observed_data.begin(); obs != observed_data.end(); ++obs) {
+      for (auto tag = tag_list.begin(); tag != tag_list.end(); ++tag) {
+        Notation nObsTagProb("P", {*obs}, Notation::GIVEN_DELIM, {*tag});
+        (*data)[nObsTagProb] = random_values[rand_index];
+        ++rand_index;
+      }
+    }
+  } else {
+    for (auto obs = observed_data.begin(); obs != observed_data.end(); ++obs) {
+      for (auto tag = tag_list.begin(); tag != tag_list.end(); ++tag) {
+        Notation nObsTagProb("P", {*obs}, Notation::GIVEN_DELIM, {*tag});
+        // Uniform probability: -1 to exclude space.
+        (*data)[nObsTagProb] = (double) 1/(obs_symbols.size()); // -1 denom ok.
       }
     }
   }
@@ -125,7 +144,10 @@ void SeedNotationConstants(map<Notation, double> *data) {
 void ChangeAbsoluteProbsToLogProbs(map<Notation, double> *data) {
   for (auto it = data->begin(); it != data->end(); ++it) {
     if (it->first.is_probability()) {
-      it->second = log(it->second);
+      if (it->second == 0)
+        it->second = -DBL_MAX;
+      else
+        it->second = log(it->second);
     }
   }
 }
