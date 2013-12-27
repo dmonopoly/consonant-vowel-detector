@@ -97,7 +97,7 @@ namespace TrellisAid {
     }
   }
 
-  void Viterbi(const map<Notation, double> &data, const vector<Node *> &nodes,
+  string Viterbi(const map<Notation, double> &data, const vector<Node *> &nodes,
                const vector<string> observed_data) {
     // Key: string representation of node; Value: best value of P(t, w) so far
     // to that node. Best P(t, w) is stored in opt.at(last node).
@@ -182,8 +182,8 @@ namespace TrellisAid {
     best_prob_pTAndW = opt.at(nodes.back()->repr());
     Notation n_best_match_pTAndW("P", assoc_word_seq, Notation::AND_DELIM,
         best_tag_seq);
-    Notation n_best_match_pTGivenW("P", best_tag_seq, Notation::GIVEN_DELIM,
-        assoc_word_seq);
+//     Notation n_best_match_pTGivenW("P", best_tag_seq, Notation::GIVEN_DELIM,
+//         assoc_word_seq);
     cout << "\n--Viterbi results--\n";
     stringstream ss;
     for (int i = 0; i < best_tag_seq.size(); ++i) {
@@ -193,6 +193,7 @@ namespace TrellisAid {
     cout << "The highest probability found belongs to " << n_best_match_pTAndW
         << ": " << best_prob_pTAndW << endl;
     cout << "Best matching tag sequence: " << best_match_pTAndW_str << endl;
+    return best_match_pTAndW_str;
   } // End Viterbi
 
   void ForwardBackwardAndViterbi(const int num_iterations,
@@ -202,6 +203,8 @@ namespace TrellisAid {
                                  const vector<Edge *> &select_edges,
                                  const vector<Edge *> &all_edges,
                                  map<Notation, double> *data,
+                                 vector<double> *increasing_probs,
+                                 string *best_match,
                                  const vector<string> observed_data) {
     Notation nObsSeq("P", observed_data, Notation::SEQ_DELIM);
     ofstream fout;
@@ -385,6 +388,7 @@ namespace TrellisAid {
       // Update probability of observed data sequence. This should increase
       // with each iteration.
       (*data)[nObsSeq] = alpha[nodes.back()->repr()];
+      increasing_probs->push_back(alpha[nodes.back()->repr()]);
 
       if (PRINT_VITERBI_RESULTS_OFTEN) {
         // Print viterbi.
@@ -409,7 +413,7 @@ namespace TrellisAid {
     if (PRINT_VITERBI_RESULTS_OFTEN) {
       cout << "Final results----" << endl;
     }
-    TrellisAid::Viterbi(*data, nodes, observed_data);
+    *best_match = TrellisAid::Viterbi(*data, nodes, observed_data);
   }
 } // end namespace TrellisAid
 

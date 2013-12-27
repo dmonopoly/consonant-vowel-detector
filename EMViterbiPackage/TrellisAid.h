@@ -34,8 +34,10 @@ namespace TrellisAid {
 
   // Traverses the trellis with the Viterbi algorithm to find the best matching
   // tag sequence and prints the results.
-  void Viterbi(const map<Notation, double> &data, const vector<Node *> &nodes,
-               const vector<string> observed_data);
+  // Returns the best matching string.
+  string Viterbi(const map<Notation, double> &data,
+                        const vector<Node *> &nodes,
+                        const vector<string> observed_data);
   // Runs ForwardBackward 'num_iterations' times to determine best probabilities
   // along edges select_edges and then calls Viterbi(). Updates data's count
   // keys (e.g., C(X,A)) in the process.
@@ -46,7 +48,10 @@ namespace TrellisAid {
                                  const vector<Edge *> &select_edges,
                                  const vector<Edge *> &all_edges,
                                  map<Notation, double> *data,
+                                 vector<double> *increasing_probs,
+                                 string *best_match,
                                  const vector<string> observed_data);
+  // TODO: move observed_data field earlier in param ordering...
 }
 
 #endif  // TRELLIS_H_

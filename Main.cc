@@ -23,10 +23,10 @@ using namespace std;
 
 #define EXTRA_PRINTING false
 
-#define NUMBER_ITERATIONS 50
+#define NUMBER_ITERATIONS 20
 #define SHOW_PROBS_BEFORE_EM false
-#define RANDOM_INITIAL_START false  // false means uniform probs used.
-#define NUM_RESTARTS 10  // Used only if RANDOM_INITIAL_START is true.
+#define RANDOM_INITIAL_START true  // false means uniform probs used.
+#define NUM_RESTARTS 3  // Used only if RANDOM_INITIAL_START is true.
 
 // Assumes _ is a space in the cypher.
 const string C_TAG = "C'";
@@ -94,7 +94,6 @@ void PrepareObsTagProbs(const vector<string> &observed_data,
                         map<Notation, double> *data) {
   // Sets initial observed char / tag probabilities. Can seed to uniform
   // probability (1/# of unique observed symbols) or randomize.
-  // TODO: randomized restarts.
   if (RANDOM_INITIAL_START) {
     vector<double> random_values;
     int sum = 0;
@@ -182,9 +181,13 @@ int main(int argc, char *argv[]) {
     cout << "Running with " << NUMBER_ITERATIONS << " iterations for each of" <<
       " the " << NUM_RESTARTS << " restarts." << endl;
     clock_t t = clock();
+    // TODO: save highest prob result, set of increasing probs that led to it,
+    // best string decipherment.
+    // A vector of multiple sets of increasing probabilities.
+    vector<vector<double> > probs;
+    // Save the best string decipherment. Indices correspond to probs' indices.
+    vector<string> best_str_matches;
     for (unsigned int i = 0; i < NUM_RESTARTS; ++i) {
-      // TODO: save highest prob result, set of increasing probs that led to it,
-      // best string decipherment.
       PrepareStartingTagProbs(&data);
       PrepareObsTagProbs(observed_data, tag_list, obs_symbols, &data);
       SeedNotationConstants(&data);
@@ -201,38 +204,57 @@ int main(int argc, char *argv[]) {
         }
       }
       cout << NUMBER_ITERATIONS << " iterations:" << endl;
+      vector<double> increasing_probs;
+      string best_match;
       TrellisAid::ForwardBackwardAndViterbi(NUMBER_ITERATIONS, obs_symbols,
-          tag_list, nodes, edges_to_update, all_edges, &data, observed_data);
+                                            tag_list, nodes, edges_to_update,
+                                            all_edges, &data, &increasing_probs,
+                                            &best_match, observed_data);
+      probs.push_back(increasing_probs);
+      best_str_matches.push_back(best_match);
+
       TrellisAid::DestroyTrellis(&nodes, &all_edges);
+      data.clear();
+      nodes.clear();
+      edges_to_update.clear();
+      all_edges.clear();
     }
     t = clock() - t;
     printf("It took me %lu clicks (%f seconds).\n", t, ((float)t)/CLOCKS_PER_SEC);
-  } else {
-    PrepareStartingTagProbs(&data);
-    PrepareObsTagProbs(observed_data, tag_list, obs_symbols, &data);
-    SeedNotationConstants(&data);
-    ChangeAbsoluteProbsToLogProbs(&data);
-    clock_t t = clock();
-    TrellisAid::BuildTrellis(&nodes, &edges_to_update, &all_edges, observed_data,
-        tag_list);
-    if (EXTRA_PRINTING) {
-      cout << "Built trellis.\n";
-    }
-
-    if (SHOW_PROBS_BEFORE_EM) {
-      cout << "Printing probs..." << endl;
-      for (auto it = data.begin(); it != data.end(); ++it) {
-        cout << it->first << " " << it->second << endl;
+    // TODO: tmp
+    for (int i = 0; i < NUM_RESTARTS; ++i) {
+      cout << i + 1 << ": " << endl;
+      cout << "best match: " << best_str_matches[0] << endl;
+      for (int j = 0; j < probs[i].size(); ++j) {
+        cout << probs[i][j] << endl;
       }
     }
-
-    cout << NUMBER_ITERATIONS << " iterations:" << endl;
-
-    TrellisAid::ForwardBackwardAndViterbi(NUMBER_ITERATIONS, obs_symbols,
-        tag_list, nodes, edges_to_update, all_edges, &data, observed_data);
-    TrellisAid::DestroyTrellis(&nodes, &all_edges);
-    t = clock() - t;
-    printf("It took me %lu clicks (%f seconds).\n", t, ((float)t)/CLOCKS_PER_SEC);
+  } else {
+//     PrepareStartingTagProbs(&data);
+//     PrepareObsTagProbs(observed_data, tag_list, obs_symbols, &data);
+//     SeedNotationConstants(&data);
+//     ChangeAbsoluteProbsToLogProbs(&data);
+//     clock_t t = clock();
+//     TrellisAid::BuildTrellis(&nodes, &edges_to_update, &all_edges, observed_data,
+//         tag_list);
+//     if (EXTRA_PRINTING) {
+//       cout << "Built trellis.\n";
+//     }
+// 
+//     if (SHOW_PROBS_BEFORE_EM) {
+//       cout << "Printing probs..." << endl;
+//       for (auto it = data.begin(); it != data.end(); ++it) {
+//         cout << it->first << " " << it->second << endl;
+//       }
+//     }
+// 
+//     cout << NUMBER_ITERATIONS << " iterations:" << endl;
+// 
+//     TrellisAid::ForwardBackwardAndViterbi(NUMBER_ITERATIONS, obs_symbols,
+//         tag_list, nodes, edges_to_update, all_edges, &data, observed_data);
+//     TrellisAid::DestroyTrellis(&nodes, &all_edges);
+//     t = clock() - t;
+//     printf("It took me %lu clicks (%f seconds).\n", t, ((float)t)/CLOCKS_PER_SEC);
   }
   return 0;
 }
