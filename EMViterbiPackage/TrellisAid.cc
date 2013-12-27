@@ -3,7 +3,7 @@
 #include "TrellisAid.h"
 
 #define EXTRA_PRINTING false
-#define PRINT_VITERBI_RESULTS_OFTEN false
+#define PRINT_VITERBI_RESULTS_OFTEN true
 
 namespace TrellisAid {
   void BuildTrellis(vector<Node *> *nodes, vector<Edge *> *select_edges,
