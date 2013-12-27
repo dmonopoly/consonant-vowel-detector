@@ -22,11 +22,13 @@
 using namespace std;
 
 #define EXTRA_PRINTING false
+#define SHOW_PROBS_BEFORE_EM false
+#define WRITE_VITERBI_RESULTS_TO_FILE true
 
 #define NUMBER_ITERATIONS 20
-#define SHOW_PROBS_BEFORE_EM false
 #define RANDOM_INITIAL_START true  // false means uniform probs used.
-#define NUM_RESTARTS 3  // Used only if RANDOM_INITIAL_START is true.
+#define NUM_RESTARTS 4  // Used only if RANDOM_INITIAL_START is true.
+#define PRINT_RESULTS_OF_EACH_RANDOM_RESTART true
 
 // Assumes _ is a space in the cypher.
 const string C_TAG = "C'";
@@ -221,40 +223,75 @@ int main(int argc, char *argv[]) {
     }
     t = clock() - t;
     printf("It took me %lu clicks (%f seconds).\n", t, ((float)t)/CLOCKS_PER_SEC);
-    // TODO: tmp
-    for (int i = 0; i < NUM_RESTARTS; ++i) {
-      cout << i + 1 << ": " << endl;
-      cout << "best match: " << best_str_matches[0] << endl;
-      for (int j = 0; j < probs[i].size(); ++j) {
-        cout << probs[i][j] << endl;
+    // Print the results of each random restart.
+    if (PRINT_RESULTS_OF_EACH_RANDOM_RESTART) {
+      for (int i = 0; i < NUM_RESTARTS; ++i) {
+        cout << i + 1 << ": " << endl;
+        cout << "best match: " << best_str_matches[i] << endl;
+        cout << "associated final probability: " << probs[i].back() << endl;
+//         for (int j = 0; j < probs[i].size(); ++j) {
+//           cout << probs[i][j] << endl;
+//         }
+      }
+    }
+    cout << endl;
+
+    cout << "Selecting the best match of all random restarts: " << endl;
+    int best = 0;
+    for (int i = 1; i < NUM_RESTARTS; ++i) {
+      if (probs[i].back() > probs[best].back()) {
+        best = i;
+      }
+    }
+    cout << "The best random restart happened on run " << best + 1 << ": \n";
+    for (int i = 0; i < probs[best].size(); ++i) {
+      cout << probs[best][i] << endl;
+    }
+    cout << "Best string match, final: " << best_str_matches[best] << endl;
+    if (WRITE_VITERBI_RESULTS_TO_FILE) {
+      ofstream fout;
+      fout.open("observed_data_probabilities.txt");
+      for (int i = 0; i < probs[best].size(); ++i) {
+        fout << probs[best][i] << endl;
       }
     }
   } else {
-//     PrepareStartingTagProbs(&data);
-//     PrepareObsTagProbs(observed_data, tag_list, obs_symbols, &data);
-//     SeedNotationConstants(&data);
-//     ChangeAbsoluteProbsToLogProbs(&data);
-//     clock_t t = clock();
-//     TrellisAid::BuildTrellis(&nodes, &edges_to_update, &all_edges, observed_data,
-//         tag_list);
-//     if (EXTRA_PRINTING) {
-//       cout << "Built trellis.\n";
-//     }
-// 
-//     if (SHOW_PROBS_BEFORE_EM) {
-//       cout << "Printing probs..." << endl;
-//       for (auto it = data.begin(); it != data.end(); ++it) {
-//         cout << it->first << " " << it->second << endl;
-//       }
-//     }
-// 
-//     cout << NUMBER_ITERATIONS << " iterations:" << endl;
-// 
-//     TrellisAid::ForwardBackwardAndViterbi(NUMBER_ITERATIONS, obs_symbols,
-//         tag_list, nodes, edges_to_update, all_edges, &data, observed_data);
-//     TrellisAid::DestroyTrellis(&nodes, &all_edges);
-//     t = clock() - t;
-//     printf("It took me %lu clicks (%f seconds).\n", t, ((float)t)/CLOCKS_PER_SEC);
+    PrepareStartingTagProbs(&data);
+    PrepareObsTagProbs(observed_data, tag_list, obs_symbols, &data);
+    SeedNotationConstants(&data);
+    ChangeAbsoluteProbsToLogProbs(&data);
+    clock_t t = clock();
+    TrellisAid::BuildTrellis(&nodes, &edges_to_update, &all_edges, observed_data,
+        tag_list);
+    if (EXTRA_PRINTING) {
+      cout << "Built trellis.\n";
+    }
+
+    if (SHOW_PROBS_BEFORE_EM) {
+      cout << "Printing probs..." << endl;
+      for (auto it = data.begin(); it != data.end(); ++it) {
+        cout << it->first << " " << it->second << endl;
+      }
+    }
+
+    cout << NUMBER_ITERATIONS << " iterations:" << endl;
+
+    vector<double> increasing_probs;
+    string best_match;
+    TrellisAid::ForwardBackwardAndViterbi(NUMBER_ITERATIONS, obs_symbols,
+                                          tag_list, nodes, edges_to_update,
+                                          all_edges, &data, &increasing_probs,
+                                          &best_match, observed_data);
+    TrellisAid::DestroyTrellis(&nodes, &all_edges);
+    t = clock() - t;
+    printf("It took me %lu clicks (%f seconds).\n", t, ((float)t)/CLOCKS_PER_SEC);
+    if (WRITE_VITERBI_RESULTS_TO_FILE) {
+      ofstream fout;
+      fout.open("observed_data_probabilities.txt");
+      for (int i = 0; i < increasing_probs.size(); ++i) {
+        fout << increasing_probs[i] << endl;
+      }
+    }
   }
   return 0;
 }
