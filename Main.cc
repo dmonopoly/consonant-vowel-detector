@@ -27,7 +27,7 @@ using namespace std;
 
 #define NUMBER_ITERATIONS 20
 #define RANDOM_INITIAL_START true  // false means uniform probs used.
-#define NUM_RESTARTS 4  // Used only if RANDOM_INITIAL_START is true.
+#define NUM_RESTARTS 20  // Used only if RANDOM_INITIAL_START is true.
 #define PRINT_RESULTS_OF_EACH_RANDOM_RESTART true
 
 // Assumes _ is a space in the cypher.
@@ -190,6 +190,7 @@ int main(int argc, char *argv[]) {
     // Save the best string decipherment. Indices correspond to probs' indices.
     vector<string> best_str_matches;
     for (unsigned int i = 0; i < NUM_RESTARTS; ++i) {
+      cout << "Random restart #" << i + 1 << " -- " << endl;
       PrepareStartingTagProbs(&data);
       PrepareObsTagProbs(observed_data, tag_list, obs_symbols, &data);
       SeedNotationConstants(&data);
