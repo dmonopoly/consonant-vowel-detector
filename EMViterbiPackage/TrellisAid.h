@@ -51,7 +51,6 @@ namespace TrellisAid {
                                  vector<double> *increasing_probs,
                                  string *best_match,
                                  const vector<string> observed_data);
-  // TODO: move observed_data field earlier in param ordering...
 }
 
 #endif  // TRELLIS_H_

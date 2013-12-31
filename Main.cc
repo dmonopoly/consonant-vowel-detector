@@ -183,8 +183,6 @@ int main(int argc, char *argv[]) {
     cout << "Running with " << NUMBER_ITERATIONS << " iterations for each of" <<
       " the " << NUM_RESTARTS << " restarts." << endl;
     clock_t t = clock();
-    // TODO: save highest prob result, set of increasing probs that led to it,
-    // best string decipherment.
     // A vector of multiple sets of increasing probabilities.
     vector<vector<double> > probs;
     // Save the best string decipherment. Indices correspond to probs' indices.
