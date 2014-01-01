@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <cassert>
 #include <ctime>
 #include <cmath>
@@ -24,6 +25,7 @@ using namespace std;
 #define EXTRA_PRINTING false
 #define SHOW_PROBS_BEFORE_EM false
 #define WRITE_VITERBI_RESULTS_TO_FILE true
+#define WRITE_LEARNED_PROBABILITIES true
 
 #define NUMBER_ITERATIONS 20
 #define RANDOM_INITIAL_START true  // false means uniform probs used.
@@ -187,6 +189,9 @@ int main(int argc, char *argv[]) {
     vector<vector<double> > probs;
     // Save the best string decipherment. Indices correspond to probs' indices.
     vector<string> best_str_matches;
+    // Save a copy of everything in 'data', the map of probabilities, for each
+    // iteration.
+    vector<map<Notation, double> > stored_data;
     for (unsigned int i = 0; i < NUM_RESTARTS; ++i) {
       cout << "Random restart #" << i + 1 << " -- " << endl;
       PrepareStartingTagProbs(&data);
@@ -215,6 +220,7 @@ int main(int argc, char *argv[]) {
       best_str_matches.push_back(best_match);
 
       TrellisAid::DestroyTrellis(&nodes, &all_edges);
+      stored_data.push_back(data);
       data.clear();
       nodes.clear();
       edges_to_update.clear();
@@ -253,6 +259,38 @@ int main(int argc, char *argv[]) {
       for (int i = 0; i < probs[best].size(); ++i) {
         fout << probs[best][i] << endl;
       }
+      fout.close();
+    }
+    if (WRITE_LEARNED_PROBABILITIES) {
+      ofstream fout;
+      fout.open("learned_probabilities_for_best_run.txt");
+      fout << "Channel probabilities:\n";
+      vector<pair<double, Notation> > sorted_pairs;
+      for (auto tag = tag_list.begin(); tag != tag_list.end(); ++tag) {
+        for (auto obs = obs_symbols.begin(); obs != obs_symbols.end(); ++obs) {
+          Notation n("P", {*obs}, Notation::GIVEN_DELIM, {*tag});
+          sorted_pairs.push_back(make_pair(stored_data[best][n], n));
+        }
+      }
+      sort(sorted_pairs.begin(), sorted_pairs.end());
+      reverse(sorted_pairs.begin(), sorted_pairs.end());
+      for (auto x : sorted_pairs) {
+        fout << x.second << ": " << x.first << endl;
+      }
+      fout << "Language model probabilities:\n";
+      sorted_pairs.clear();
+      for (auto tag1 = tag_list.begin(); tag1 != tag_list.end(); ++tag1) {
+        for (auto tag2 = tag_list.begin(); tag2 != tag_list.end(); ++tag2) {
+          Notation n("P", {*tag1}, Notation::GIVEN_DELIM, {*tag2});
+          sorted_pairs.push_back(make_pair(stored_data[best][n], n));
+        }
+      }
+      sort(sorted_pairs.begin(), sorted_pairs.end());
+      reverse(sorted_pairs.begin(), sorted_pairs.end());
+      for (auto x : sorted_pairs) {
+        fout << x.second << ": " << x.first << endl;
+      }
+      fout.close();
     }
   } else {
     PrepareStartingTagProbs(&data);
@@ -290,6 +328,7 @@ int main(int argc, char *argv[]) {
       for (int i = 0; i < increasing_probs.size(); ++i) {
         fout << increasing_probs[i] << endl;
       }
+      fout.close();
     }
   }
   return 0;
