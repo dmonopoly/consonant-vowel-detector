@@ -27,7 +27,7 @@ using namespace std;
 #define WRITE_VITERBI_RESULTS_TO_FILE true
 #define WRITE_LEARNED_PROBABILITIES true
 
-#define TREAT_UNDERSCORE_AS_SPACE true
+#define TREAT_UNDERSCORE_AS_SPACE false
 #define NUMBER_ITERATIONS 20
 #define RANDOM_INITIAL_START true  // false means uniform probs used.
 #define NUM_RESTARTS 20  // Used only if RANDOM_INITIAL_START is true.
@@ -140,7 +140,7 @@ void PrepareObsTagProbs(const vector<string> &observed_data,
     }
     Notation nSpaceObsGivenSpaceTag("P", {"_"}, Notation::GIVEN_DELIM, {"_'"});
     (*data)[nSpaceObsGivenSpaceTag] = 1;
-  } // TODO: try auto-learning spaces too.
+  }
 }
 
 void SeedNotationConstants(map<Notation, double> *data) {

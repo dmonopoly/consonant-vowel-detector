@@ -1,5 +1,5 @@
 ## What is this?
-A program that distinguishes consonants vs. vowels in text.
+A program that distinguishes consonants, vowels, and spaces in text.
 
 ### Purpose
 Research. 
@@ -60,12 +60,21 @@ You might change the latter to true if you want to see the specific results of
 each viterbi run, like the result after 1 iteration of EM, then 2, etc. But
 false is good if you have lots of random restarts and/or lots of iterations.
 
+## Notes on input files
+CypherReader, which is used by Main.cc, accepts files where **each
+symbol is separated by a normal space** (i.e. the space you
+get by hitting the spacebar). So a single symbol could be represented as *xyz*,
+and three symbols where the middle one is a space *symbol* could be
+
+    xyz _ bts
+
 ## Notes on results
 The following tags are used in the system:
 
     C', V', and _'
 
-- Underscore means space.
+- Underscore means space, as in the *observed symbol* from the cypher.
+- Underscore with ' means space as in the *tag*.
 - The apostrophe is there to differentiate it from an observed symbol from the
   cypher. e.g., C is the observed symbol found from a cypher, while C with an
   apostrophe is the tag for Consonant.
