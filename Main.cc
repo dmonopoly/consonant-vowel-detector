@@ -27,6 +27,7 @@ using namespace std;
 #define WRITE_VITERBI_RESULTS_TO_FILE true
 #define WRITE_LEARNED_PROBABILITIES true
 
+#define TREAT_UNDERSCORE_AS_SPACE true
 #define NUMBER_ITERATIONS 20
 #define RANDOM_INITIAL_START true  // false means uniform probs used.
 #define NUM_RESTARTS 20  // Used only if RANDOM_INITIAL_START is true.
@@ -128,16 +129,18 @@ void PrepareObsTagProbs(const vector<string> &observed_data,
       }
     }
   }
-  // Deal with spaces in the substitute table: set
-  // P(any obs except space|space tag) to 0 and P(space obs|space tag) to 1.
-  // "_" means "space" in the ciphertext letter sequence.
-  // Altered to "_'" for tags in DisambiguateDuplicates.
-  for (auto obs = observed_data.begin(); obs != observed_data.end(); ++obs) {
-    Notation nAnythingGivenSpaceTag("P", {*obs}, Notation::GIVEN_DELIM, {"_'"});
-    (*data)[nAnythingGivenSpaceTag] = 0;
-  }
-  Notation nSpaceObsGivenSpaceTag("P", {"_"}, Notation::GIVEN_DELIM, {"_'"});
-  (*data)[nSpaceObsGivenSpaceTag] = 1;
+  if (TREAT_UNDERSCORE_AS_SPACE) {
+    // Deal with spaces in the substitute table: set
+    // P(any obs except space|space tag) to 0 and P(space obs|space tag) to 1.
+    // "_" means "space" in the ciphertext letter sequence.
+    // Altered to "_'" for tags in DisambiguateDuplicates.
+    for (auto obs = observed_data.begin(); obs != observed_data.end(); ++obs) {
+      Notation nAnythingGivenSpaceTag("P", {*obs}, Notation::GIVEN_DELIM, {"_'"});
+      (*data)[nAnythingGivenSpaceTag] = 0;
+    }
+    Notation nSpaceObsGivenSpaceTag("P", {"_"}, Notation::GIVEN_DELIM, {"_'"});
+    (*data)[nSpaceObsGivenSpaceTag] = 1;
+  } // TODO: try auto-learning spaces too.
 }
 
 void SeedNotationConstants(map<Notation, double> *data) {
