@@ -1,12 +1,15 @@
 // Takes learned_probabilities_for_best_run.txt output from Main and reformats
 // in a variety of ways.  E.g., log probs -> normal probs
 #include <algorithm>
+#include <cmath>
 #include <fstream>
 #include <sstream>
 #include <iostream>
 #include <map>
 #include <utility>
 #include <vector>
+
+#define REVERT_PROBS true
 
 using namespace std;
 
@@ -26,6 +29,19 @@ void OrganizeIntoList(const vector<pair<double, string> > &pr_list,
       (*organized_list)[tag] = inner;
     } else {
       (*organized_list)[tag].push_back(aPair);
+    }
+  }
+}
+
+void PrintOrganizedData(map<string, vector<pair<double, string> > >
+                        organized_list) {
+  for (auto x : organized_list) {
+    cout << "Tag: " << x.first << endl;
+    for (auto y : x.second) {
+      if (REVERT_PROBS)
+        cout << "\t" << y.second << " " << exp(y.first) << endl;
+      else
+        cout << "\t" << y.second << " " << y.first << endl;
     }
   }
 }
@@ -75,21 +91,11 @@ int main(int argc, char *argv[]) {
     map<string, vector<pair<double, string> > > organized_list;
     OrganizeIntoList(ch_pr_list, &organized_list);
     cout << "Channel probabilities:" << endl;
-    for (auto x : organized_list) {
-      cout << "Tag: " << x.first << endl;
-      for (auto y : x.second) {
-        cout << "\t" << y.second << y.first << endl;
-      }
-    }
+    PrintOrganizedData(organized_list);
     organized_list.clear();
     OrganizeIntoList(lm_pr_list, &organized_list);
     cout << "Language model probabilities:" << endl;
-    for (auto x : organized_list) {
-      cout << "Tag: " << x.first << endl;
-      for (auto y : x.second) {
-        cout << "\t" << y.second << y.first << endl;
-      }
-    }
+    PrintOrganizedData(organized_list);
   }
   return 0;
 }
