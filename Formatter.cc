@@ -5,11 +5,15 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
+#include <iomanip>
 #include <map>
 #include <utility>
 #include <vector>
 
-#define REVERT_PROBS true
+bool REVERT_PROBS = true;  // Convert log probs to regular probs.
+// Command line parameters.
+bool FEWER_DECIMAL_PLACES = false;
+int NUM_DEC_PLACES = 3;
 
 using namespace std;
 
@@ -35,21 +39,38 @@ void OrganizeIntoList(const vector<pair<double, string> > &pr_list,
 
 void PrintOrganizedData(map<string, vector<pair<double, string> > >
                         organized_list) {
+  if (FEWER_DECIMAL_PLACES)
+    cout << fixed << setprecision(NUM_DEC_PLACES);
   for (auto x : organized_list) {
     cout << "Tag: " << x.first << endl;
     for (auto y : x.second) {
-      if (REVERT_PROBS)
-        cout << "\t" << y.second << " " << exp(y.first) << endl;
-      else
-        cout << "\t" << y.second << " " << y.first << endl;
+      if (FEWER_DECIMAL_PLACES) {
+        if (REVERT_PROBS){
+          if (exp(y.first) >= pow(10, -NUM_DEC_PLACES))
+            cout << "\t" << y.second << " " << exp(y.first) << endl;
+        } else {
+          if (y.first >= pow(10, -NUM_DEC_PLACES))
+            cout << "\t" << y.second << " " << y.first << endl;
+        }
+      } else {
+        if (REVERT_PROBS)
+          cout << "\t" << y.second << " " << exp(y.first) << endl;
+        else
+          cout << "\t" << y.second << " " << y.first << endl;
+      }
     }
   }
 }
 
 int main(int argc, char *argv[]) {
-  if (argc != 2) {
-    cerr << "Usage: ./<exec> learned_probabilities_for_best_run.txt" << endl;
+  if (argc < 2) {
+    cerr << "Usage: ./<exec> learned_probabilities_for_best_run.txt [num decimal places]" << endl;
     return 0;
+  } else if (argc == 3) {
+    stringstream ss;
+    ss << argv[2];
+    ss >> NUM_DEC_PLACES;
+    FEWER_DECIMAL_PLACES = true;
   }
   string filename = argv[1];
   ifstream fin;
